@@ -1,0 +1,437 @@
+
+/* Overall landing page */
+* {
+    margin: 0;
+    padding: 0;        
+    box-sizing: border-box;
+    font-family:"Courier New", monospace;
+    overflow-x: hidden; /* Disable horizontal scrolling */
+}
+
+/* Smooth scrolling behaviour */
+html {
+    scroll-behavior:smooth;
+}
+
+html, body, main {
+    height: 100%;
+}
+
+body {
+    color: #333;
+}
+
+/* Header fixed*/
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #1D4E89; 
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+/* Title:InterviewX*/
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+}
+
+/*Unordered list in header*/
+nav ul {
+    list-style-type: none;
+    display: flex;
+    gap: 20px;
+}
+
+/*Page section links*/
+nav ul li a {
+    text-decoration: none;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+    color: #F79256;
+}
+
+/*Chatbot and girl image*/
+.img {
+    margin-top: 4%;
+    width: 2300px;
+    height: 500px;
+    animation: slideInLeft 1s forwards;
+}
+
+/*Text beside image*/
+.content {
+    text-align: left;
+    margin-right:3.5%;
+    animation: slideInRight 1s forwards;
+}
+
+/* Home section*/
+#home-section h1{
+    font-size: 60px;
+    font-weight: bolder;
+    color: #1D4E89;
+    margin-bottom: 20px;
+}
+
+#home-section p{
+    font-size: 24px;
+    color:#00B2CA;
+    font-weight: bold;
+}
+
+/*Interview now button*/
+.interview-btn {
+    display: inline-block;
+    background-color: #F79256; 
+    box-shadow: 5px 5px 7px  #1D4E89;
+    color:white;
+    padding: 15px 30px;
+    font-size: 25px;
+    font-weight: bolder;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    margin-right: 7%; 
+    transition: background-color 0.5s ease;
+}
+
+.interview-btn:hover {
+    background-color: #00B2CA; 
+    box-shadow: 5px 5px 10px #1D4E89; /* Enhanced shadow */
+}
+
+/*Three sections:home,features,about us*/
+.section {
+    display: flex; /* Change to flex to enable centering */
+    height: 100%; /* Fill full height */
+    justify-content: center; /* Center content horizontally */
+    align-items: center; 
+    text-align: center; 
+    position: relative;
+}
+
+.section.active {
+    display: flex; /* Show only active section */
+    opacity: 1; /* Fade in */
+}
+
+/*Features section*/
+#features-section .container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.Features {
+    background-color: white;
+    border: 2px solid #1D4E89; 
+    color: #00B2CA; 
+    border-radius: 5px;
+    padding: 20px;
+    text-align: center;
+    flex: 1; 
+    margin: 0 10px; /* Space between feature boxes */
+}
+
+#features-section {
+    display: flex;
+    flex-direction: column; 
+    justify-content: flex-start; 
+    align-items: center; 
+    height: 100%; 
+    width: 100%; 
+    padding: 0; 
+    margin: 0; 
+    background-color:#B0E0E6;
+}
+
+#features-section h1 {
+    font-size: 34px; 
+    background-color: #F79256; 
+    box-shadow: 5px 5px 7px #1D4E89;
+    color: white;
+    padding: 15px 30px; /* Keep padding for button style */
+    font-weight: bolder;
+    text-decoration: none;
+    border-radius: 5px;
+    margin:140px 0 20px 0;  /* Center with vertical margins */
+    transition: background-color 0.5s ease;
+    text-align: center; 
+    width: auto;
+    animation: slideInTop 1s forwards; 
+}
+
+.Features {
+    background-color: white;
+    border: 3px solid #1D4E89; /* Dark blue border */
+    color: #00B2CA; /* Sky blue text */
+    border-radius: 5px;
+    padding: 30px;
+    text-align: center;
+    flex: 1; 
+    margin: 20px 0;
+    height: 300px;
+    margin: 20px; 
+    box-shadow: 5px 7px 10px #F79256; 
+    animation: slideUpBottom 1s forwards; /* Adjust duration as needed */
+    opacity: 0; /* Start hidden */
+    animation-delay: 0.5s; /* Adjust delay for staggered effect */
+}
+
+.Features h2 {
+    font-size: 28px; 
+    font-weight:bolder;
+}
+
+.Features p {
+    margin-top: 10px;
+    font-size: 20px; /* Increase size of p elements */
+}
+
+/*About Us section*/
+#about-us-section {
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    justify-content: flex-start; 
+    align-items: center; /* Center content vertically */
+    height: 100%; 
+    width: 100%; 
+    padding: 0; 
+    margin: 0; 
+    padding: 15px 30px; 
+    background-color:lightgoldenrodyellow;
+}
+
+#about-us-section h1 {
+    font-size: 34px; 
+    background-color: #F79256; 
+    box-shadow: 5px 5px 7px #1D4E89;
+    color: white;
+    padding: 15px 30px; /* Keep padding for button style */
+    font-weight: bolder;
+    text-decoration: none;
+    border-radius: 5px;
+    margin:140px 0 20px 0;  /* Center with vertical margins */
+    text-align: center; 
+    width: auto; 
+    animation: slideInTop 1s forwards; /* Adjust duration as needed */
+}
+
+#about-us-section p {
+    font-weight: bold;
+    color: #00B2CA; 
+    margin-top: 10px; 
+    font-size: 20px; 
+    margin-left: 12%; /* Left margin for spacing */
+    margin-right: 12%; 
+    line-height: 1.5;
+    animation: fadeIn 1s forwards; /* Adjust duration as needed */
+    opacity: 0; /* Start hidden */
+    animation-delay: 0.5s; /* Adjust delay for staggered effect */
+}
+
+/*Animations*/
+/* Keyframe animations */
+@keyframes slideInLeft {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInTop {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUpBottom {
+    0% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+} 
+
+#upload-div {
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    justify-content: flex-start; 
+    align-items: center; /* Center content vertically */
+    height: 100%; 
+    width: 100%; 
+    padding: 0; 
+    margin: 0; 
+    background-color:#B0E0E6;
+    margin-bottom: 3%;
+}
+
+#inside-div {
+    font-size: 34px; 
+    background-color: #F79256; 
+    box-shadow: 5px 5px 7px #1D4E89;
+    color: white;
+    padding: 15px 30px; /* Keep padding for button style */
+    font-weight: bolder;
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 140px 0 20px 0;  /* Center with vertical margins */
+    text-align: center; 
+    width: auto; 
+    animation: slideInTop 1s forwards; /* Adjust duration as needed */
+}
+
+#upload-div {
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    justify-content: flex-start; 
+    align-items: center; /* Center content vertically */
+    height: auto; /* Allow height to adjust based on content */
+    width: 100%; 
+    padding: 0; 
+    margin: 0; 
+}
+
+#inside-div {
+    font-size: 34px; 
+    background-color: #F79256; 
+    box-shadow: 5px 5px 7px #1D4E89;
+    color: white;
+    padding: 15px 30px; /* Keep padding for button style */
+    font-weight: bolder;
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 140px 0 20px;  /* Center with vertical margins */
+    text-align: center; 
+    width: auto; 
+    animation: slideInTop 1s forwards; /* Adjust duration as needed */
+}
+
+.form-container {
+    background-color: white;
+    border: 3px solid #1D4E89; /* Dark blue border */
+    color: #00B2CA; /* Sky blue text */
+    border-radius: 5px;
+    padding: 20px; /* Reduce padding to avoid overflow */
+    box-shadow: 5px 7px 10px #F79256; 
+    animation: slideUpBottom 1s forwards; /* Adjust duration as needed */
+    opacity: 0; /* Start hidden */
+    animation-delay: 0.5s; /* Adjust delay for staggered effect */
+    width: 500px; /* Set a width for the container */
+    margin: 10px auto; /* Center the container */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align items to the left */
+}
+
+.job-desc,
+.upload-resume,
+.input-text {
+    font-size: 16px;
+    border: none; /* Remove border since it's in the container */
+    color: #00B2CA;    /* Sky blue text */
+    margin: 15px 0; /* Reduce margin to avoid overflow */
+    width: 100%; /* Use full width of the container */
+}
+
+.upload-resume {
+    color:#1D4E89;
+    font-weight: bolder;
+}
+
+h2 {
+    margin-top: 0;
+    color:#1D4E89;
+}
+
+textarea {
+    background-color: white;
+    font-size: 16px;
+    font-weight: bolder;
+    color: black;
+    border: 2px solid #1D4E89; /* Sky blue border for textarea */
+    border-radius: 4px;
+    padding: 10px;
+    width: 100%; /* Width to fit inside the div */
+}
+
+input[type="text"],
+input[type="file"] {
+    background-color: white;
+    font-size: 16px;
+    font-weight: bolder;
+    color: black;
+    padding: 10px;
+    border-radius: 4px;
+    border: 2px solid #1D4E89; /* Sky blue border for input fields */
+    width: 100%; /* Width to fit inside the div */
+}
+
+.form-actions {
+    text-align: center; /* Center align button */
+    width: 100%; /* Full width for button alignment */
+}
+
+button {
+    padding: 10px 20px;
+    font-weight: bolder;
+    background-color: lightgoldenrodyellow; /* Dark blue background */
+    color: black;
+    border: 2px solid #1D4E89;
+    border-radius:5px;
+}
+
+button:hover{
+    color: white;
+    font-weight: bolder;
+    background-color: #1D4E89;
+    border: 2px solid #F79256;
+}

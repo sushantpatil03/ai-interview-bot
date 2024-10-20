@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InterviewX</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Include PDF.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">InterviewX</div>
+        <nav>
+            <ul>
+                <li><a href="index.html#home-section" onclick="showSection('home'); return false;">Home</a></li>
+                <li><a href="index.html#features-section" onclick="showSection('features'); return false;">Features</a></li>
+                <li><a href="index.html#about-us-section" onclick="showSection('about'); return false;">About Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div id="upload-div">
+            <h1 id="inside-div">Upload Details</h1>
+
+            <div class="form-container">
+                <form id="resumeForm" action="app.py" method="POST">
+    
+                    <div class="input-text">
+                        <h2>Candidate Name</h2>
+                        <input type="text" name="candidateName" placeholder="Enter your name" required>
+                    </div>
+    
+                    <div class="job-desc">
+                        <h2>Job Description</h2>
+                        <textarea name="jobDescription" rows="4" placeholder="Enter the job description here..." required></textarea>
+                    </div>
+                    
+                    <div class="upload-resume">
+                        <h2>Upload Resume</h2>
+                        <input type="file" id="resumeFile" accept=".pdf" required>
+                    </div>
+
+                    <!-- Hidden textarea to store extracted resume text -->
+                    <div class="hidden-textarea">
+                        <textarea id="resumeText" name="resumeText" style="display:none;"></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit">Submit</button>
+                    </div>
+                </form>
+            <div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('resumeFile').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+
+            if (file.type !== 'application/pdf') {
+                alert("Please upload a PDF file.");
+                return;
+            }
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const pdfData = new Uint8Array(e.target.result);
+                
+                pdfjsLib.getDocument(pdfData).promise.then(function(pdf) {
+                    let textContent = "";
+                    
+                    let pagesPromises = [];
+
+                    // Loop through each page of the PDF and extract text
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        pagesPromises.push(
+                            pdf.getPage(i).then(function(page) {
+                                return page.getTextContent().then(function(textContent) {
+                                    return textContent.items.map(function(item) {
+                                        return item.str;
+                                    }).join(' ');
+                                });
+                            })
+                        );
+                    }
+
+                    // Once all pages are processed
+                    Promise.all(pagesPromises).then(function(pagesText) {
+                        textContent = pagesText.join(' ');
+                        // Set the extracted text into the hidden textarea
+                        document.getElementById('resumeText').value = textContent;
+                        console.log("Extracted Resume Text: ", textContent);
+                    });
+                });
+            };
+            
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+
+</html>
