@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Interface</title>
+    <link rel="stylesheet" href="interviwe.css"> <!-- Link to the external CSS file -->
+</head>
+<body>
+
+<div class="interview-container">
+    <div class="ai-bubble">
+        <div class="ai-image"></div>
+        <p id="question">Hi there! Let's begin the interview. Please introduce yourself.</p>
+    </div>
+
+    <div class="video-container">
+        <video id="userVideo" autoplay></video>
+    </div>
+
+    <div class="controls">
+        <button id="nextQuestionBtn">Next Question</button>
+    </div>
+
+    <!-- Toggle controls for mic and camera -->
+    <div class="toggle-controls">
+        <button id="micToggle">
+            <i class="fa fa-microphone-slash"></i> <!-- Mic icon -->
+        </button>
+        <button id="cameraToggle">
+            <i class="fa fa-camera"></i> <!-- Camera icon -->
+        </button>
+    </div>
+</div>
+
+<script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- Font Awesome for icons -->
+
+<script>
+    const video = document.getElementById('userVideo');
+    const micToggle = document.getElementById('micToggle');
+    const cameraToggle = document.getElementById('cameraToggle');
+    let stream;
+
+    // Get user video stream
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(function(userStream) {
+                stream = userStream;
+                video.srcObject = stream;
+            })
+            .catch(function(err) {
+                console.error("Error accessing video/audio stream: ", err);
+            });
+    }
+
+    // Microphone toggle
+    micToggle.addEventListener('click', function() {
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks[0].enabled) {
+            audioTracks[0].enabled = false;
+            micToggle.innerHTML = '<i class="fa fa-microphone"></i>'; // Change to mic icon when muted
+        } else {
+            audioTracks[0].enabled = true;
+            micToggle.innerHTML = '<i class="fa fa-microphone-slash"></i>'; // Change to muted mic icon
+        }
+    });
+
+    // Camera toggle
+    cameraToggle.addEventListener('click', function() {
+        const videoTracks = stream.getVideoTracks();
+        if (videoTracks[0].enabled) {
+            videoTracks[0].enabled = false;
+            cameraToggle.innerHTML = '<i class="fa fa-camera-slash"></i>'; // Change to camera-off icon
+        } else {
+            videoTracks[0].enabled = true;
+            cameraToggle.innerHTML = '<i class="fa fa-camera"></i>'; // Change to camera-on icon
+        }
+    });
+
+    // AI questions simulation
+    const questions = [
+        "Can you tell me about a challenge you faced in your last job?",
+        "What are your strengths and weaknesses?",
+        "Where do you see yourself in five years?",
+        "Why should we hire you for this position?"
+    ];
+
+    let questionIndex = 0;
+
+    // Function to speak the question
+    function speakQuestion(text) {
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.lang = 'en-US';
+        speechSynthesis.speak(speech);
+    }
+
+    // Speak the first question
+    speakQuestion(document.getElementById('question').innerText);
+
+    document.getElementById('nextQuestionBtn').addEventListener('click', function() {
+        questionIndex++;
+        if (questionIndex < questions.length) {
+            const newQuestion = questions[questionIndex];
+            document.getElementById('question').innerText = newQuestion;
+            speakQuestion(newQuestion); // Make the avatar read the next question
+        } else {
+            const completionMessage = "Thank you! The interview is now complete.";
+            document.getElementById('question').innerText = completionMessage;
+            speakQuestion(completionMessage); // Make the avatar read the completion message
+            this.disabled = true;
+        }
+    });
+</script>
+
+</body>
+</html>
