@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-    
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,18 +27,18 @@
             <h1 id="inside-div">Upload Details</h1>
 
             <div class="form-container">
-                <form id="resumeForm" action="app.py" method="POST">
-    
+                <form id="resumeForm" method="POST">
+
                     <div class="input-text">
                         <h2>Candidate Name</h2>
                         <input type="text" name="candidateName" placeholder="Enter your name" required>
                     </div>
-    
+
                     <div class="job-desc">
                         <h2>Job Description</h2>
-                        <textarea name="jobDescription" rows="4" placeholder="Enter the job description here..." required></textarea>
+                        <textarea id="jobDescription" name="jobDescription" rows="4" placeholder="Enter the job description here..." required></textarea>
                     </div>
-                    
+
                     <div class="upload-resume">
                         <h2>Upload Resume</h2>
                         <input type="file" id="resumeFile" accept=".pdf" required>
@@ -48,12 +48,12 @@
                     <div class="hidden-textarea">
                         <textarea id="resumeText" name="resumeText" style="display:none;"></textarea>
                     </div>
-                    
+
                     <div class="form-actions">
-                        <button type="submit">Submit</button>
+                        <button type="submit" id="submitBtn">Submit</button>
                     </div>
                 </form>
-            <div>
+            </div>
         </div>
     </main>
 
@@ -67,13 +67,13 @@
             }
 
             const reader = new FileReader();
-            
+
             reader.onload = function(e) {
                 const pdfData = new Uint8Array(e.target.result);
-                
+
                 pdfjsLib.getDocument(pdfData).promise.then(function(pdf) {
                     let textContent = "";
-                    
+
                     let pagesPromises = [];
 
                     // Loop through each page of the PDF and extract text
@@ -98,8 +98,25 @@
                     });
                 });
             };
-            
+
             reader.readAsArrayBuffer(file);
+        });
+
+        // Intercept form submission to store data in local storage
+        document.getElementById('resumeForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent actual form submission
+
+            const jobDescription = document.getElementById('jobDescription').value;
+            const resumeText = document.getElementById('resumeText').value;
+
+            // Store data in local storage
+            localStorage.setItem('jobDescription', jobDescription);
+            localStorage.setItem('resumeText', resumeText);
+
+            console.log("Stored JD and Resume Text in local storage.");
+
+            // Optionally, redirect to another page or show a success message
+            window.location.href = 'interview.html'; // Change to the next page if needed
         });
     </script>
 </body>
