@@ -4,111 +4,339 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interview Interface</title>
-    <link rel="stylesheet" href="interviwe.css"> <!-- Link to the external CSS file -->
+    <style>
+        /* Keeping the same CSS as provided */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #1D4E89;
+        }
+
+        .interview-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 900px;
+            height: 80vh;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .video-container {
+            width: 100%;
+            height: 100%;
+            background-color: #00B2CA;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 5px solid #F79256;
+        }
+
+        .ai-bubble {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            background-color: #F79256;
+            color: white;
+            padding: 15px;
+            border-radius: 25px;
+            max-width: 70%;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            animation: pop-up 0.5s ease-out;
+        }
+
+        @keyframes pop-up {
+            0% { transform: translateY(-50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .controls { position: absolute; bottom: 20px; right: 20px; }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #1D4E89;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin: 0 5px;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) { background-color: #F79256; }
+
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .toggle-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            display: none;
+        }
+
+        .recording .status-indicator {
+            display: block;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+    </style>
 </head>
 <body>
 
 <div class="interview-container">
+    <div class="status-indicator">🔴 Recording</div>
     <div class="ai-bubble">
         <div class="ai-image"></div>
         <p id="question">Hi there! Let's begin the interview. Please introduce yourself.</p>
     </div>
 
     <div class="video-container">
-        <video id="userVideo" autoplay></video>
+        <video id="userVideo" autoplay muted playsinline></video>
     </div>
 
     <div class="controls">
+        <button id="startRecording">Start Recording</button>
+        <button id="submitAnswer" disabled>Submit Answer</button>
         <button id="nextQuestionBtn">Next Question</button>
     </div>
 
-    <!-- Toggle controls for mic and camera -->
     <div class="toggle-controls">
-        <button id="micToggle">
-            <i class="fa fa-microphone-slash"></i> <!-- Mic icon -->
+        <button id="micToggle" class="control-btn">
+            <span>🎤</span>
         </button>
-        <button id="cameraToggle">
-            <i class="fa fa-camera"></i> <!-- Camera icon -->
+        <button id="cameraToggle" class="control-btn">
+            <span>📷</span>
         </button>
     </div>
 </div>
 
-<script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- Font Awesome for icons -->
-
 <script>
-    const video = document.getElementById('userVideo');
-    const micToggle = document.getElementById('micToggle');
-    const cameraToggle = document.getElementById('cameraToggle');
-    let stream;
+    class InterviewManager {
+        constructor() {
+            this.video = document.getElementById('userVideo');
+            this.micToggle = document.getElementById('micToggle');
+            this.cameraToggle = document.getElementById('cameraToggle');
+            this.startRecordingBtn = document.getElementById('startRecording');
+            this.submitAnswerBtn = document.getElementById('submitAnswer');
+            this.nextQuestionBtn = document.getElementById('nextQuestionBtn');
+            
+            this.stream = null;
+            this.mediaRecorder = null;
+            this.audioChunks = [];
+            this.recognition = null;
+            this.isRecording = false;
+            this.completeTranscript = '';
+            
+            this.questions = [
+                "Can you tell me about a challenge you faced in your last job?",
+                "What are your strengths and weaknesses?",
+                "Where do you see yourself in five years?",
+                "Why should we hire you for this position?"
+            ];
+            this.questionIndex = 0;
 
-    // Get user video stream
-    if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-            .then(function(userStream) {
-                stream = userStream;
-                video.srcObject = stream;
-            })
-            .catch(function(err) {
-                console.error("Error accessing video/audio stream: ", err);
-            });
+            this.initializeEventListeners();
+            this.initializeMediaDevices();
+            this.initializeSpeechRecognition();
+        }
+
+        async initializeMediaDevices() {
+            try {
+                this.stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: true 
+                });
+                this.video.srcObject = this.stream;
+                console.log('Media devices initialized successfully');
+            } catch (error) {
+                console.error('Error accessing media devices:', error);
+                this.showError('Failed to access camera/microphone. Please check permissions.');
+            }
+        }
+
+        initializeSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                console.error('Speech recognition not supported');
+                this.showError('Speech recognition is not supported in this browser.');
+                return;
+            }
+
+            this.recognition = new SpeechRecognition();
+            this.recognition.continuous = true;
+            this.recognition.interimResults = true;
+
+            this.recognition.onresult = (event) => {
+                const result = event.results[event.results.length - 1];
+                if (result.isFinal) {
+                    this.completeTranscript += result[0].transcript + ' ';
+                    console.log('Transcript updated:', this.completeTranscript);
+                }
+            };
+
+            this.recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                this.showError('Speech recognition error: ' + event.error);
+            };
+
+            this.recognition.onend = () => {
+                if (this.isRecording) {
+                    this.recognition.start();
+                }
+            };
+        }
+
+        initializeEventListeners() {
+            this.startRecordingBtn.addEventListener('click', () => this.startRecording());
+            this.submitAnswerBtn.addEventListener('click', () => this.stopRecording());
+            this.micToggle.addEventListener('click', () => this.toggleMicrophone());
+            this.cameraToggle.addEventListener('click', () => this.toggleCamera());
+            this.nextQuestionBtn.addEventListener('click', () => this.nextQuestion());
+        }
+
+        async startRecording() {
+            if (!this.stream) {
+                console.error('No media stream available');
+                return;
+            }
+
+            try {
+                this.isRecording = true;
+                this.completeTranscript = '';
+                this.audioChunks = [];
+                
+                // Create a new MediaRecorder instance
+                this.mediaRecorder = new MediaRecorder(this.stream);
+                
+                this.mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        this.audioChunks.push(event.data);
+                    }
+                };
+
+                this.mediaRecorder.start();
+                this.recognition.start();
+
+                document.querySelector('.interview-container').classList.add('recording');
+                this.startRecordingBtn.disabled = true;
+                this.submitAnswerBtn.disabled = false;
+                
+                console.log('Recording started successfully');
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                this.showError('Failed to start recording. Please try again.');
+            }
+        }
+
+        async stopRecording() {
+            if (!this.isRecording) return;
+
+            try {
+                this.isRecording = false;
+                this.recognition.stop();
+                this.mediaRecorder.stop();
+
+                document.querySelector('.interview-container').classList.remove('recording');
+                this.startRecordingBtn.disabled = false;
+                this.submitAnswerBtn.disabled = true;
+
+                console.log('Recording stopped. Final transcript:', this.completeTranscript.trim());
+                
+                // Save or process the recording here
+                const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                console.log('Audio recording available at:', audioUrl);
+                
+            } catch (error) {
+                console.error('Error stopping recording:', error);
+                this.showError('Error stopping recording. Please try again.');
+            }
+        }
+
+        toggleMicrophone() {
+            if (!this.stream) return;
+            const audioTrack = this.stream.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                this.micToggle.querySelector('span').textContent = audioTrack.enabled ? '🎤' : '🚫';
+            }
+        }
+
+        toggleCamera() {
+            if (!this.stream) return;
+            const videoTrack = this.stream.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled;
+                this.cameraToggle.querySelector('span').textContent = videoTrack.enabled ? '📷' : '🚫';
+            }
+        }
+
+        nextQuestion() {
+            this.questionIndex++;
+            if (this.questionIndex < this.questions.length) {
+                const newQuestion = this.questions[this.questionIndex];
+                document.getElementById('question').textContent = newQuestion;
+                this.speakQuestion(newQuestion);
+            } else {
+                const completionMessage = "Thank you! The interview is now complete.";
+                document.getElementById('question').textContent = completionMessage;
+                this.speakQuestion(completionMessage);
+                this.nextQuestionBtn.disabled = true;
+            }
+        }
+
+        speakQuestion(text) {
+            const speech = new SpeechSynthesisUtterance(text);
+            speech.lang = 'en-US';
+            speechSynthesis.speak(speech);
+        }
+
+        showError(message) {
+            // You can implement a proper error display mechanism here
+            alert(message);
+        }
     }
 
-    // Microphone toggle
-    micToggle.addEventListener('click', function() {
-        const audioTracks = stream.getAudioTracks();
-        if (audioTracks[0].enabled) {
-            audioTracks[0].enabled = false;
-            micToggle.innerHTML = '<i class="fa fa-microphone"></i>'; // Change to mic icon when muted
-        } else {
-            audioTracks[0].enabled = true;
-            micToggle.innerHTML = '<i class="fa fa-microphone-slash"></i>'; // Change to muted mic icon
-        }
-    });
-
-    // Camera toggle
-    cameraToggle.addEventListener('click', function() {
-        const videoTracks = stream.getVideoTracks();
-        if (videoTracks[0].enabled) {
-            videoTracks[0].enabled = false;
-            cameraToggle.innerHTML = '<i class="fa fa-camera-slash"></i>'; // Change to camera-off icon
-        } else {
-            videoTracks[0].enabled = true;
-            cameraToggle.innerHTML = '<i class="fa fa-camera"></i>'; // Change to camera-on icon
-        }
-    });
-
-    // AI questions simulation
-    const questions = [
-        "Can you tell me about a challenge you faced in your last job?",
-        "What are your strengths and weaknesses?",
-        "Where do you see yourself in five years?",
-        "Why should we hire you for this position?"
-    ];
-
-    let questionIndex = 0;
-
-    // Function to speak the question
-    function speakQuestion(text) {
-        const speech = new SpeechSynthesisUtterance(text);
-        speech.lang = 'en-US';
-        speechSynthesis.speak(speech);
-    }
-
-    // Speak the first question
-    speakQuestion(document.getElementById('question').innerText);
-
-    document.getElementById('nextQuestionBtn').addEventListener('click', function() {
-        questionIndex++;
-        if (questionIndex < questions.length) {
-            const newQuestion = questions[questionIndex];
-            document.getElementById('question').innerText = newQuestion;
-            speakQuestion(newQuestion); // Make the avatar read the next question
-        } else {
-            const completionMessage = "Thank you! The interview is now complete.";
-            document.getElementById('question').innerText = completionMessage;
-            speakQuestion(completionMessage); // Make the avatar read the completion message
-            this.disabled = true;
-        }
+    // Initialize the interview manager when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        const interview = new InterviewManager();
     });
 </script>
 
