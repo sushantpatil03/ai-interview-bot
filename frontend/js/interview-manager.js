@@ -15,6 +15,8 @@ class InterviewManager {
         this.completeTranscript = '';
         this.interviewId = null;
         this.currentQuestion = '';
+        this.maxQuestions = 2; // Set the maximum number of questions here
+        this.currentQuestionIndex = 0;
         
         // Start setup
         this.setup();
@@ -29,6 +31,7 @@ class InterviewManager {
         this.nextQuestionBtn = document.getElementById('nextQuestionBtn');
         this.questionElement = document.getElementById('question');
         this.statusIndicator = document.querySelector('.status-indicator');
+        this.submitInterviewBtn = document.getElementById('submitInterview');
         
         if (!this.video || !this.questionElement) {
             throw new Error('Required DOM elements not found');
@@ -103,8 +106,10 @@ class InterviewManager {
 
     initializeEventListeners() {
         this.startRecordingBtn.addEventListener('click', () => this.startRecording());
-        this.submitAnswerBtn.addEventListener('click', () => this.stopRecording());
-        this.nextQuestionBtn.addEventListener('click', () => this.submitAnswer());
+        this.submitAnswerBtn.addEventListener('click', () => this.submitAnswer());
+        this.nextQuestionBtn.addEventListener('click', () => this.getNextQuestion());
+        this.submitInterviewBtn = document.getElementById('submitInterview');
+        this.submitInterviewBtn.addEventListener('click', () => this.submitInterview());
         
         this.micToggle.addEventListener('click', () => this.toggleMicrophone());
         this.cameraToggle.addEventListener('click', () => this.toggleCamera());
@@ -155,6 +160,7 @@ class InterviewManager {
         }
     }
 
+
     startRecording() {
         if (this.isRecording) return;
         
@@ -176,6 +182,83 @@ class InterviewManager {
             this.isRecording = false;
         }
     }
+
+    submitAnswer() {
+        if (!this.isRecording) return;
+    
+        try {
+            this.stopRecording();
+            if(this.currentQuestionIndex == this.maxQuestions){
+                console.log('Interview complete');
+                this.submitAnswerBtn.disabled = true;
+                this.nextQuestionBtn.disabled = true;
+                // Display the thank you dialog
+                this.showThankYouDialog();
+            }
+            else{
+            // Prepare the answer data to be sent to the server
+            const answerData = {
+                interview_id: this.interviewId,
+                answer: this.completeTranscript,
+                question: this.currentQuestion
+            };
+    
+            // Send the answer data to the server
+            this.sendAnswerToServer(answerData);
+    
+            // Clear the transcript and get the next question
+            this.completeTranscript = '';
+
+        }
+        } catch (error) {
+            console.error('Error submitting answer:', error);
+            this.showError('Failed to submit answer');
+        }
+
+        
+    }
+    
+    sendAnswerToServer(answerData) {
+        // Implement the logic to send the answer data to the server
+        // For example, using fetch to make a POST request to the server
+        fetch(`${BASE_URL}/next-question`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(answerData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Handle the response from the server
+            this.currentQuestion = data.next_question;
+            this.questionElement.textContent = this.currentQuestion;
+            this.speakQuestion(this.currentQuestion);
+    
+            // Increment the current question index
+            this.currentQuestionIndex++;
+    
+            // Check if the maximum number of questions has been reached
+            if (this.currentQuestionIndex >= this.maxQuestions) {
+                // Disable the "Next Question" button
+                this.nextQuestionBtn.disabled = true;
+                // Add any other logic you want to perform when the interview is complete
+                console.log('Interview complete!');
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting answer:', error);
+            this.showError('Failed to submit answer');
+        });
+    }
+    
+    
 
     async stopRecording() {
         if (!this.isRecording) return;
@@ -247,6 +330,64 @@ class InterviewManager {
             document.querySelector('.interview-container').appendChild(loader);
         }
         loader.style.display = show ? 'block' : 'none';
+    }
+
+    async submitInterview() {
+        try {
+            if (this.currentQuestionIndex >= this.maxQuestions) {
+                const response = await fetch(`${BASE_URL}/evaluate-interview`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        interview_id: this.interviewId
+                    })
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+    
+                const evaluationResult = await response.json();
+                console.log('Interview Evaluation Result:', evaluationResult);
+    
+                // Display the evaluation result to the user
+                this.displayEvaluationResult(evaluationResult);
+    
+                
+            } else {
+                this.showError('Interview not complete. Please answer all the questions.');
+            }
+        } catch (error) {
+            console.error('Error submitting interview:', error);
+            this.showError('Failed to submit interview');
+        }
+    }
+    
+    showThankYouDialog() {
+        const thankYouMessage = "Thank you for completing the interview! Your feedback has been submitted. We appreciate your time and effort.";
+        alert(thankYouMessage);
+    
+        // Use speech synthesis to read the thank you message
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(thankYouMessage);
+            speechSynthesis.speak(utterance);
+        }
+    }
+    
+    displayEvaluationResult(evaluationResult) {
+        // Display the evaluation result to the user
+        console.log(`Confidence Score: ${evaluationResult.confidence_score}`);
+        console.log(`Communication Score: ${evaluationResult.communication_score}`);
+        console.log('Strengths:');
+        evaluationResult.strengths.forEach(strength => console.log(`- ${strength}`));
+        console.log('Weaknesses:');
+        evaluationResult.weaknesses.forEach(weakness => console.log(`- ${weakness}`));
+        console.log('Detailed Feedback:', evaluationResult.detailed_feedback);
+        console.log('Improvement Suggestions:');
+        evaluationResult.improvement_suggestions.forEach(suggestion => console.log(`- ${suggestion}`));
     }
 }
 
