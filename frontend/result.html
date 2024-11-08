@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Evaluation Result</title>
+    <style>
+        /* Apply the provided CSS */
+        body {
+            font-family: "Courier New", monospace;
+            color: #333;
+            background-color: lightgoldenrodyellow;
+        }
+
+        h1 {
+            color: #1D4E89;
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .result-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: white;
+            border: 3px solid #1D4E89;
+            border-radius: 5px;
+            box-shadow: 5px 7px 10px #F79256;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+        }
+
+        .result-section h2 {
+            color: #00B2CA;
+            margin-bottom: 10px;
+        }
+
+        .result-section p {
+            margin: 5px 0;
+        }
+
+        .result-section ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        .result-section li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interview Evaluation Result</h1>
+    <div class="result-container">
+        <div class="result-section">
+            <h2>Confidence Score</h2>
+            <p id="confidence-score"></p>
+        </div>
+        <div class="result-section">
+            <h2>Communication Score</h2>
+            <p id="communication-score"></p>
+        </div>
+        <div class="result-section">
+            <h2>Strengths</h2>
+            <ul id="strengths"></ul>
+        </div>
+        <div class="result-section">
+            <h2>Weaknesses</h2>
+            <ul id="weaknesses"></ul>
+        </div>
+        <div class="result-section">
+            <h2>Detailed Feedback</h2>
+            <p id="detailed-feedback"></p>
+        </div>
+        <div class="result-section">
+            <h2>Improvement Suggestions</h2>
+            <ul id="improvement-suggestions"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Assuming you have the evaluationResult object from the previous script
+        window.onload = function() {
+            const evaluationResult = JSON.parse(localStorage.getItem('evaluationResult'));
+            // Populate the page with the evaluation result data
+            document.getElementById('confidence-score').textContent = evaluationResult.confidence_score;
+            document.getElementById('communication-score').textContent = evaluationResult.communication_score;
+
+            const strengthsList = document.getElementById('strengths');
+            evaluationResult.strengths.forEach(strength => {
+                const li = document.createElement('li');
+                li.textContent = strength;
+                strengthsList.appendChild(li);
+            });
+
+            const weaknessesList = document.getElementById('weaknesses');
+            evaluationResult.weaknesses.forEach(weakness => {
+                const li = document.createElement('li');
+                li.textContent = weakness;
+                weaknessesList.appendChild(li);
+            });
+
+            document.getElementById('detailed-feedback').textContent = evaluationResult.detailed_feedback;
+
+            const improvementSuggestionsList = document.getElementById('improvement-suggestions');
+            evaluationResult.improvement_suggestions.forEach(suggestion => {
+                const li = document.createElement('li');
+                li.textContent = suggestion;
+                improvementSuggestionsList.appendChild(li);
+            });
+        };
+    </script>
+</body>
+</html>

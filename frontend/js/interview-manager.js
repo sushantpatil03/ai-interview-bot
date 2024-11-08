@@ -355,8 +355,6 @@ class InterviewManager {
     
                 // Display the evaluation result to the user
                 this.displayEvaluationResult(evaluationResult);
-    
-                
             } else {
                 this.showError('Interview not complete. Please answer all the questions.');
             }
@@ -388,6 +386,11 @@ class InterviewManager {
         console.log('Detailed Feedback:', evaluationResult.detailed_feedback);
         console.log('Improvement Suggestions:');
         evaluationResult.improvement_suggestions.forEach(suggestion => console.log(`- ${suggestion}`));
+
+         // Display the evaluation result to the user
+        localStorage.setItem('evaluationResult', JSON.stringify(evaluationResult));
+        // Open the result.html page
+        window.open('result.html', '_blank');
     }
 }
 
